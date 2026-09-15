@@ -1,0 +1,39 @@
+[[questions]]
+id = "shape-associativity-not-commutativity"
+type = "MultipleChoice"
+prompt.prompt = """
+`str` is not commutative — `(str "a" "b")` differs from `(str "b" "a")`. Can it still be used as a `combinef` for `r/fold`?
+"""
+prompt.distractors = [
+  "No — parallel reduction requires commutativity, since chunks finish in an unpredictable order.",
+  "No — `str` has no zero-arity, so it fails before commutativity matters.",
+  "Only if you also pass an explicit initial value to `fold`.",
+]
+answer.answer = """
+Yes. `fold` combines chunk results in collection order, so it requires associativity and an identity, but not commutativity.
+"""
+context = """
+The chunks are *computed* in an unpredictable order, but they are *combined* in order. So the bracketing can vary — which is why associativity is required — while the left-to-right sequence cannot.
+
+`(str)` returns `""`, so `str` has its identity too.
+"""
+
+[[questions]]
+id = "shape-average"
+type = "MultipleChoice"
+prompt.prompt = """
+Why can you not compute a mean by folding with "average of two numbers" as the combining function?
+"""
+prompt.distractors = [
+  "Because averaging has no identity element.",
+  "Because averaging is not commutative.",
+  "You can, provided the collection length is a power of two.",
+]
+answer.answer = """
+Because averaging is not associative: the average of two chunk averages is only the true average when the chunks are equal in size, which `fold` does not guarantee.
+"""
+context = """
+Fold a sum and a count together, then divide once at the end.
+
+This is a genuinely common production bug, and it is subtle because the result is not wildly wrong — just quietly, unreproducibly off.
+"""

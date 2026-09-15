@@ -1,0 +1,19 @@
+[book]
+title = "tenfold"
+authors = ["Iain Stenson"]
+description = "A companion to days 1 and 2 of the Clojure chapter of Seven Concurrency Models in Seven Weeks"
+language = "en"
+src = "src"
+
+[output.html]
+default-theme = "rust"
+preferred-dark-theme = "ayu"
+git-repository-url = "https://github.com/Iain-S/tenfold"
+edit-url-template = "https://github.com/Iain-S/tenfold/edit/main/book/src/{path}"
+additional-css = ["theme/custom.css"]
+
+[output.html.fold]
+enable = true
+level = 1
+
+[preprocessor.quiz]

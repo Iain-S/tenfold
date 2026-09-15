@@ -1,0 +1,58 @@
+/* tenfold callouts */
+.callout {
+  border-left: 4px solid var(--callout-accent, #888);
+  background: var(--callout-bg, rgba(128, 128, 128, 0.08));
+  padding: 0.6em 1em;
+  margin: 1.4em 0;
+  border-radius: 0 4px 4px 0;
+}
+.callout > .callout-title {
+  font-weight: 600;
+  margin: 0 0 0.4em 0;
+  font-size: 0.85em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--callout-accent, #888);
+}
+.callout > :last-child { margin-bottom: 0; }
+
+.callout-book   { --callout-accent: #7048e8; --callout-bg: rgba(112, 72, 232, 0.08); }
+.callout-gap    { --callout-accent: #d9480f; --callout-bg: rgba(217, 72, 15, 0.08); }
+.callout-rust   { --callout-accent: #b7410e; --callout-bg: rgba(183, 65, 14, 0.08); }
+.callout-repl   { --callout-accent: #2b8a3e; --callout-bg: rgba(43, 138, 62, 0.08); }
+
+.ayu .callout, .coal .callout, .navy .callout {
+  --callout-bg: rgba(255, 255, 255, 0.05);
+}
+
+/* placeholder marker */
+.todo {
+  display: inline-block;
+  font-size: 0.75em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: rgba(217, 72, 15, 0.15);
+  color: #d9480f;
+  padding: 0.15em 0.5em;
+  border-radius: 3px;
+  vertical-align: middle;
+}
+
+.callout-exercise { --callout-accent: #1864ab; --callout-bg: rgba(24, 100, 171, 0.08); }
+
+.callout-exercise details {
+  margin-top: 0.8em;
+  border-top: 1px solid rgba(128, 128, 128, 0.25);
+  padding-top: 0.6em;
+}
+.callout-exercise details > summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9em;
+  color: var(--callout-accent);
+  list-style: none;
+}
+.callout-exercise details > summary::before { content: "▸ "; }
+.callout-exercise details[open] > summary::before { content: "▾ "; }
+.callout-exercise details > summary::-webkit-details-marker { display: none; }

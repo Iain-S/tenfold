@@ -1,0 +1,6 @@
+book/book/
+.cpcache/
+.nrepl-port
+.calva/
+target/
+*.bz2

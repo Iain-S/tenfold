@@ -1,0 +1,62 @@
+[[questions]]
+id = "collfold-why-zero-arity"
+type = "MultipleChoice"
+prompt.prompt = """
+Why must a `combinef` passed to `r/fold` have a zero-arity case?
+"""
+prompt.distractors = [
+  "So that `fold` can detect whether the function is associative before using it.",
+  "So that `fold` can call it once at the very end, to finalise the result.",
+  "So that `fold` can decide how many chunks to split the collection into.",
+]
+answer.answer = """
+Because each chunk is reduced independently and needs a starting value, which `fold` obtains by calling `combinef` with no arguments.
+"""
+context = """
+`fold` reduces each chunk separately, and every one of those reductions needs a seed. Rather than take an `init` argument, `fold` asks the combining function to supply one via `(combinef)`.
+
+This is why `+` works without you noticing: `(+)` returns `0`.
+"""
+
+[[questions]]
+id = "collfold-bad-identity"
+type = "MultipleChoice"
+prompt.prompt = """
+You fold with a `combinef` whose zero-arity returns `[0]` instead of `[]`. Your unit tests, which use 100-element inputs, all pass. What happens in production on a 100,000-element input?
+"""
+prompt.distractors = [
+  "The same thing — a broken identity produces the same wrong answer regardless of input size.",
+  "An `ArityException`, once the collection is large enough to be chunked.",
+  "Nothing: `fold` discards the seed value when combining chunk results.",
+]
+answer.answer = """
+You get 256 spurious zeros rather than one, because the number of chunks — and so the number of times the bad seed is used — grows with the input.
+"""
+context = """
+The tests pass because 100 elements is a single chunk, so `fold` degenerates to `reduce` and the bad seed is used exactly once, where it may be harmless.
+
+This is the characteristic shape of a broken-identity bug: invisible at test scale, and its severity depends on input size and machine.
+"""
+
+[[questions]]
+id = "collfold-lazy-seq"
+type = "MultipleChoice"
+prompt.prompt = """
+```clojure
+(r/fold + (take 100000 (repeatedly #(rand-int 10))))
+```
+What does this do?
+"""
+prompt.distractors = [
+  "Throws, because lazy sequences do not implement `CollFold`.",
+  "Folds in parallel, after realising the sequence into a vector first.",
+  "Folds in parallel, realising elements lazily as each chunk needs them.",
+]
+answer.answer = """
+Returns the correct sum, computed serially on one thread, with no warning that no parallelism occurred.
+"""
+context = """
+`take` returns a lazy sequence. `CollFold` has a default implementation extended to `Object` which simply calls `reduce`, so anything that does not implement folding properly degrades silently rather than failing.
+
+Silent degradation is the dangerous part: the answer is right, so nothing prompts you to look.
+"""
