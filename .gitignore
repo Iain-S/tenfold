@@ -4,3 +4,4 @@ book/book/
 .calva/
 target/
 *.bz2
+book/src/quiz/
