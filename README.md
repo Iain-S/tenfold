@@ -50,7 +50,14 @@ placeholders carrying their gap-lists. See
 
 ## Licence
 
-TODO — not yet chosen. Likely CC BY 4.0 for the prose and MIT for the code.
+Dual-licensed, the usual split for a book with code in it:
+
+- **Prose** — [CC BY 4.0](LICENSE-PROSE). Share it, adapt it, use it in your
+  teaching; just credit it.
+- **Code** — [MIT](LICENSE-CODE). Everything under `src/`, and every code
+  snippet in the chapters.
+
+Copyright © 2026 Iain Stenson.
 
 This repository contains no text or code from *Seven Concurrency Models in Seven
 Weeks*. It cites the book by day, section and page so you can read along. Buy
