@@ -1,18 +1,13 @@
 # Introduction
 
 This is a companion to **days 1 and 2 of the Clojure chapter** of *Seven
-Concurrency Models in Seven Weeks* by Paul Butcher. It is not a substitute for
-that book, and it will not make much sense without it. Keep the book open.
+Concurrency Models in Seven Weeks* by Paul Butcher.
 
 ## Why this exists
 
-*Seven Concurrency Models* is a good book that moves fast. Rather too fast, in
-places: functions and terms arrive already in use, and by the time you notice
-you did not understand one, you are three pages past it.
+*Seven Concurrency Models* is a good book that moves rather too fast in some places.
 
-This companion slows down at those points. It has one organising claim:
-
-> The things that bite you are exactly the things the book does not say out loud.
+This companion slows down at those points.
 
 Two examples, both of which cost real debugging time before a word of this was
 written.

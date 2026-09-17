@@ -13,9 +13,11 @@ Read it at **https://iain-s.github.io/tenfold** (with the book open beside you).
 ## Building
 
 ```console
-$ cargo install mdbook mdbook-quiz --locked
-$ mdbook serve book --open
+$ make tools     # cargo install mdbook + mdbook-quiz, at the versions CI uses
+$ make serve     # live preview at http://localhost:3000
 ```
+
+`make` with no target lists the rest (`build`, `clean`, `repl`).
 
 ## Running the Clojure
 
