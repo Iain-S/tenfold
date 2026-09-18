@@ -16,12 +16,19 @@ import re, sys
 
 ABBREV = r'(?<!\be\.g)(?<!\bi\.e)(?<!\betc)(?<!\bcf)(?<!\bvs)(?<!\bMr)(?<!\bMrs)(?<!\bDr)(?<!\bSt)(?<!\bNo)(?<!\bFig)(?<!\bapprox)'
 # split after . ? ! (plus optional closing quote/bracket), before an opening-ish char
-SPLIT = re.compile(ABBREV + r'(?<=[.?!])(["\'’”\)\]]*)\s+(?=["\'“‘\*_\[(]*(?:`|[A-Z0-9]))')
+SPLIT = re.compile(ABBREV + r'(?<=[.?!])(["\'’”\)\]]*)\s+(?=["\'“‘\*_\[(]*(?:`|<[a-z]|[A-Z0-9]))')
 
 FENCE = re.compile(r'^\s*(```|~~~)')
 LIST = re.compile(r'^(\s*)([-*+]|\d+[.)])(\s+)(.*)$')
 # lines that are never merged into a paragraph
 ATOMIC = re.compile(r'^\s*(#|\||>|<|\{\{#|---\s*$|\*\*\*\s*$|___\s*$|\[\^|\[[^\]]+\]:)')
+# ...except when the '<' opens an inline tag: `<kbd>ctrl+enter</kbd> evaluates`
+# is prose, not a raw-HTML block, so it reflows like any other sentence.
+INLINE_TAG = re.compile(r'^\s*</?(kbd|code|em|strong|a|b|i|u|sup|sub|abbr|var|samp)\b', re.I)
+
+
+def atomic(line):
+    return bool(ATOMIC.match(line)) and not INLINE_TAG.match(line)
 
 def split_sentences(text):
     parts, last = [], 0
@@ -77,7 +84,7 @@ def process(text):
             out.append('')
             i += 1
             continue
-        if ATOMIC.match(line):
+        if atomic(line):
             flush()
             out.append(line)
             i += 1

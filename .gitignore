@@ -6,3 +6,7 @@ target/
 *.bz2
 book/src/quiz/
 .vscode/
+todo.md
+.clj-kondo/
+.githooks/
+.lsp/
