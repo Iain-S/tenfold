@@ -1,0 +1,64 @@
+[[questions]]
+id = "one-page-lazy-source"
+type = "MultipleChoice"
+prompt.prompt = """
+What makes `(->> (:content (xml/parse reader)) (filter #(= :page (:tag %))) (map page-text))` able to walk a 24GB dump without loading it?
+"""
+prompt.distractors = [
+  "`filter` and `map` are lazy, so the document is parsed once into memory and then traversed lazily.",
+  "`xml/parse` memory-maps the file, so the operating system pages the document in and out as needed.",
+  "The dump is compressed, so it fits in memory once decompressed incrementally by the reader.",
+]
+answer.answer = """
+`clojure.data.xml` is a pull parser: the root element's `:content` is a lazy sequence that reads from the stream only as it is consumed.
+"""
+context = """
+Laziness here comes from the library, not from the calling code — which is why the pipeline looks like ordinary sequence code and gives no clue that it is streaming.
+
+`filter` and `map` being lazy matters too, but only because what they are wrapping is already lazy. Wrap an eagerly parsed document in the same pipeline and you have already lost.
+"""
+
+[[questions]]
+id = "one-page-with-open"
+type = "MultipleChoice"
+prompt.prompt = """
+```clojure
+(defn pages [filename]
+  (with-open [r (io/reader filename)]
+    (page-texts r)))
+```
+What happens when you consume the result?
+"""
+prompt.distractors = [
+  "It works: `with-open` closes the reader only once the lazy sequence has been fully realised.",
+  "It works, but leaks the file handle, because `with-open` cannot close a reader held by a lazy sequence.",
+  "It throws immediately at the call to `pages`, before anything is consumed.",
+]
+answer.answer = """
+It throws `XMLStreamException: ... Stream closed` on first consumption — `with-open` closed the reader when `pages` returned, which was before any page had been read.
+"""
+context = """
+This is the standard lazy-IO trap: `with-open` scopes to the *dynamic extent of the body*, and a lazy sequence escapes that extent unrealised.
+
+The fix is to invert the call — pass the consuming function in, so the consumption happens inside the `with-open` — or to read each file eagerly and separately, which is what `map slurp` over a directory does.
+"""
+
+[[questions]]
+id = "one-page-pmap-granularity"
+type = "MultipleChoice"
+prompt.prompt = """
+`(pmap #(frequencies (get-words %)) pages)` counts each Wikipedia page on a separate thread. Why does the book immediately move on to batching?
+"""
+prompt.distractors = [
+  "Because `pmap` is not actually parallel — it is semi-lazy, so it runs one page at a time.",
+  "Because `pmap` cannot be combined with `merge-with +`, which needs a vector rather than a lazy sequence.",
+  "Because `pmap` realises the whole sequence eagerly, so the dump no longer streams.",
+]
+answer.answer = """
+Because one page is too small a unit of work: per-page coordination — a future, a thread hand-off, a result map to merge — can cost more than counting the words in that page.
+"""
+context = """
+Clojure's own docstring says `pmap` is "only useful for computationally intensive functions where the time of f dominates the coordination overhead".
+
+`pmap` is genuinely parallel, and it does stay lazy — it runs ahead of consumption by `(+ 2 processors)` futures, 12 on a 10-core machine. The problem is granularity, not parallelism, and batching is the fix: give each thread a chunk of pages rather than one page.
+"""

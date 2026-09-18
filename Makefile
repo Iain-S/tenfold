@@ -4,8 +4,15 @@ MDBOOK_VERSION := 0.5.4
 QUIZ_VERSION   := 0.5.0
 HLJS_VERSION   := 11.11.1
 
+# The corpus the book's examples run against. The default is one shard of the
+# English Wikipedia dump (~285MB) rather than the full 24GB export.
+DUMP_URL    := https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles1.xml-p1p41242.bz2
+DUMP        := $(notdir $(DUMP_URL))
+CORPUS_DIR  := wiki5000
+CORPUS_SIZE := 5000
+
 .DEFAULT_GOAL := help
-.PHONY: help serve build clean repl tools fmt fmt-check hooks highlight-js
+.PHONY: help serve build clean repl tools fmt fmt-check hooks highlight-js corpus
 
 # Tracked Markdown only; the pre-commit hook covers anything newly staged.
 MARKDOWN := $(shell git ls-files --cached '*.md')
@@ -35,6 +42,12 @@ fmt-check:  ## Fail if any Markdown is not one sentence per line
 
 hooks:  ## Point git at .githooks (enables the pre-commit format check)
 	git config core.hooksPath .githooks
+
+corpus:  ## Download a Wikipedia dump shard and extract pages into wiki5000/
+	@test -s $(DUMP) || { echo "Downloading $(DUMP) (~285MB, resumable)..."; \
+	                      curl -fL -C - -o $(DUMP) $(DUMP_URL); }
+	@test -d $(CORPUS_DIR) && echo "$(CORPUS_DIR)/ already exists — delete it to re-extract." \
+	 || clj -M -m tenfold.wiki $(DUMP) $(CORPUS_DIR) $(CORPUS_SIZE)
 
 highlight-js:  ## Rebuild book/theme/highlight.js (mdBook's bundle has no Clojure)
 	@cdn=https://cdnjs.cloudflare.com/ajax/libs/highlight.js/$(HLJS_VERSION); \

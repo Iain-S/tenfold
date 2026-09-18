@@ -33,6 +33,7 @@ $ make fmt-check                # fail if any Markdown is unformatted
 $ make hooks                    # enable the pre-commit format check (once per clone)
 $ make tools                    # install mdBook + mdbook-quiz at CI's versions
 $ make highlight-js             # regenerate book/theme/highlight.js
+$ make corpus                   # fetch a dump shard, extract 5000 pages to wiki5000/
 ```
 
 `make` on its own lists the targets.
@@ -159,4 +160,8 @@ Adding a chapter means adding the file *and* its line in `book/src/SUMMARY.md`; 
 - `{{#include}}` paths are relative to the chapter file, so day chapters need `../../../src/tenfold/...`.
 - `r/fold` over a lazy sequence silently falls back to serial `reduce`.
   If an example claims parallelism, check the collection is a vector or map.
+- A real Wikipedia dump declares an XML namespace, so `data.xml` tags come back as `:xmlns.…export-0.11%2F/page`, never `:page`.
+  Match tags by `name`, as `tenfold.wiki/tag=` does; matching the keyword silently finds nothing.
+- `make corpus` builds `wiki5000/` from a dump shard.
+  The dump, the corpus and anything derived from them are gitignored — Wikipedia text is CC BY-SA, and the corpus is reproducible from one command, so neither belongs in the repository.
 - mdBook's bundled highlight.js has **no Clojure grammar**, so ```` ```clojure ```` blocks render unstyled with the stock theme. `book/theme/highlight.js` overrides it with the highlight.js common bundle plus Clojure, and `make highlight-js` regenerates that file — do not hand-edit it. Highlighting is applied in the browser, so a rendered page's HTML shows no `hljs-` spans; check the bundle itself if it looks wrong.
