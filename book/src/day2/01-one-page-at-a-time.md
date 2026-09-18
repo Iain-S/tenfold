@@ -5,7 +5,7 @@
 <div class="callout callout-book">
 <p class="callout-title">In the book</p>
 
-Day 2, *One Page at a Time*, p61–63.
+Day 2, *One Page at a Time*, p61–62.
 
 </div>
 

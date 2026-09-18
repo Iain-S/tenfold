@@ -5,7 +5,7 @@
 <div class="callout callout-book">
 <p class="callout-title">In the book</p>
 
-Day 2, *Reducers*, p63–65.
+Day 2, *Reducers*, p64.
 
 </div>
 

@@ -5,7 +5,7 @@
 <div class="callout callout-book">
 <p class="callout-title">In the book</p>
 
-Day 2, *Reducers' Internals*, p65–67.
+Day 2, *Reducers' Internals* and *CollReduce*, p65–66.
 
 </div>
 

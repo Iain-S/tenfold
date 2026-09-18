@@ -33,6 +33,10 @@ def atomic(line):
 def split_sentences(text):
     parts, last = [], 0
     for m in SPLIT.finditer(text):
+        # never break inside an inline code span: an odd number of backticks
+        # before this point means we are inside one
+        if text.count('`', 0, m.start()) % 2:
+            continue
         end = m.end(1)
         parts.append(text[last:end])
         last = m.end()

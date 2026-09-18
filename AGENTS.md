@@ -54,6 +54,28 @@ This repository is public; the source book is copyrighted and paid for.
 
 Licences are split: prose is CC BY 4.0 (`LICENSE-PROSE`), code MIT (`LICENSE-CODE`).
 
+### The local PDF
+
+A copy of the book's PDF sits in the working directory, so citations can be checked rather than guessed.
+**It must never be committed**, and neither must any text extracted from it.
+`.gitignore` covers the PDF itself and the `pdf_*.txt` extracts; put anything else you extract outside the repository.
+
+Check a citation with `pdftotext -layout <pdf> -` and search the result.
+**Never convert PDF page to printed page with a fixed offset** — it drifts through the book (14 at the start, then 13 from p50, 12 from p190, 11 from p224, 9 from p272) because of unnumbered part and blank pages.
+Read the printed number off each page's own running header instead: `pdftotext` puts it on the page's first line, as `Chapter 3. Functional Programming • 50`.
+Extracts are a research aid only — nothing from them belongs in a chapter beyond the day, section and page.
+
+### Other sources worth reading
+
+Two good, freely available sources of Clojure lore, useful when a chapter needs background the book does not give:
+
+- [*Clojure for the Brave and True*](https://www.braveclojure.com/) — Daniel Higginbotham's introduction, strong on the reader's-first-encounter explanations this project is trying to write.
+- The [official Clojure blog](https://clojure.org/news/news) and the reference pages under [clojure.org](https://clojure.org/reference/documentation) — in particular Rich Hickey's original reducers posts, which are the primary source for day 2.
+
+Treat these exactly as the book is treated: **read them for inspiration and to check your understanding, never to copy from**.
+Their wording, their examples and their diagrams are all someone else's copyright.
+If one of them shapes a chapter, link to it and say what it gave you.
+
 ## Writing conventions
 
 - **Companion, not substitute.** Assume the reader has the book open.
@@ -137,6 +159,4 @@ Adding a chapter means adding the file *and* its line in `book/src/SUMMARY.md`; 
 - `{{#include}}` paths are relative to the chapter file, so day chapters need `../../../src/tenfold/...`.
 - `r/fold` over a lazy sequence silently falls back to serial `reduce`.
   If an example claims parallelism, check the collection is a vector or map.
-- mdBook's bundled highlight.js has **no Clojure grammar**, so ```` ```clojure ```` blocks render unstyled with the stock theme.
-  `book/theme/highlight.js` overrides it with the highlight.js common bundle plus Clojure, and `make highlight-js` regenerates that file — do not hand-edit it.
-  Highlighting is applied in the browser, so a rendered page's HTML shows no `hljs-` spans; check the bundle itself if it looks wrong.
+- mdBook's bundled highlight.js has **no Clojure grammar**, so ```` ```clojure ```` blocks render unstyled with the stock theme. `book/theme/highlight.js` overrides it with the highlight.js common bundle plus Clojure, and `make highlight-js` regenerates that file — do not hand-edit it. Highlighting is applied in the browser, so a rendered page's HTML shows no `hljs-` spans; check the bundle itself if it looks wrong.

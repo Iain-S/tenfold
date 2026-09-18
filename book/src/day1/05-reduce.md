@@ -5,7 +5,7 @@
 <div class="callout callout-book">
 <p class="callout-title">In the book</p>
 
-Day 1, *Our First Functional Program*, p55–57.
+Day 1, *Our First Functional Program*, p53–54.
 
 </div>
 

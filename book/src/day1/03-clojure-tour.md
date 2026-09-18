@@ -5,7 +5,7 @@
 <div class="callout callout-book">
 <p class="callout-title">In the book</p>
 
-Day 1, *A Whirlwind Tour of Clojure*, p53–55.
+Day 1, *A Whirlwind Tour of Clojure*, p52–53.
 
 </div>
 

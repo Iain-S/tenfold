@@ -5,7 +5,7 @@
 <div class="callout callout-book">
 <p class="callout-title">In the book</p>
 
-Day 1, *Counting Words Functionally* through *It's Good to Be Lazy*, p58–61.
+Day 1, *Counting Words Functionally* through *It's Good to Be Lazy*, p56–59.
 
 </div>
 

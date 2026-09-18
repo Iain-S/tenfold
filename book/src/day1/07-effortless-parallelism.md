@@ -5,7 +5,7 @@
 <div class="callout callout-book">
 <p class="callout-title">In the book</p>
 
-Day 1, *Effortless Parallelism*, p57–58.
+Day 1, *Effortless Parallelism*, p54–55.
 
 </div>
 

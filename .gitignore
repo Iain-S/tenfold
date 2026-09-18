@@ -10,3 +10,6 @@ todo.md
 .clj-kondo/
 .githooks/
 .lsp/
+seven-concurrency-models-in-seven-weeks*
+*.pdf
+pdf_*.txt

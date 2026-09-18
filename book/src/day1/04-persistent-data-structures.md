@@ -5,7 +5,9 @@
 <div class="callout callout-book">
 <p class="callout-title">In the book</p>
 
-Day 1, *A Whirlwind Tour of Clojure*, p54 (asserted in passing).
+Nowhere in days 1 and 2.
+The tour on p52–53 uses immutable collections throughout without ever saying what makes updating one cheap, and the term *persistent data structure* does not appear until Chapter 4, *The Clojure Way* (p86).
+The words "structural sharing" appear nowhere in the book at all.
 
 </div>
 

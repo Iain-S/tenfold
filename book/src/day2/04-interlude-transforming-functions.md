@@ -5,7 +5,7 @@
 <div class="callout callout-book">
 <p class="callout-title">In the book</p>
 
-Day 2, *Reducers' Internals*, p65 — the idea is used, never named.
+Day 2, *Reducers' Internals*, p65–66 — the idea is used, never named.
 
 </div>
 

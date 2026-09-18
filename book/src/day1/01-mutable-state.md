@@ -3,7 +3,7 @@
 <div class="callout callout-book">
 <p class="callout-title">In the book</p>
 
-Day 1, *The Perils of Mutable State*, p50–53.
+Day 1, *The Perils of Mutable State* through *Escapologist Mutable State*, p50–51.
 
 </div>
 
