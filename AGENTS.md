@@ -14,6 +14,7 @@ book/book.toml        mdBook config (quiz preprocessor, callout CSS, Pages URLs)
 book/src/             chapters; SUMMARY.md is the table of contents
 book/src/quizzes/     mdbook-quiz TOML, one per chapter
 book/theme/custom.css callout and .todo styling
+book/theme/highlight.js highlight.js bundle — generated, includes Clojure
 src/tenfold/          runnable Clojure, included into chapters
 deps.edn              Clojure CLI deps
 docs/                 design notes
@@ -31,6 +32,7 @@ $ make fmt                      # reflow Markdown to one sentence per line
 $ make fmt-check                # fail if any Markdown is unformatted
 $ make hooks                    # enable the pre-commit format check (once per clone)
 $ make tools                    # install mdBook + mdbook-quiz at CI's versions
+$ make highlight-js             # regenerate book/theme/highlight.js
 ```
 
 `make` on its own lists the targets.
@@ -135,3 +137,6 @@ Adding a chapter means adding the file *and* its line in `book/src/SUMMARY.md`; 
 - `{{#include}}` paths are relative to the chapter file, so day chapters need `../../../src/tenfold/...`.
 - `r/fold` over a lazy sequence silently falls back to serial `reduce`.
   If an example claims parallelism, check the collection is a vector or map.
+- mdBook's bundled highlight.js has **no Clojure grammar**, so ```` ```clojure ```` blocks render unstyled with the stock theme.
+  `book/theme/highlight.js` overrides it with the highlight.js common bundle plus Clojure, and `make highlight-js` regenerates that file — do not hand-edit it.
+  Highlighting is applied in the browser, so a rendered page's HTML shows no `hljs-` spans; check the bundle itself if it looks wrong.

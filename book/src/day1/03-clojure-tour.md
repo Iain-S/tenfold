@@ -25,8 +25,7 @@ TODO — summarise, briefly, so the reader can orient.
 
 ## Collections are functions
 
-Clojure's collections implement `IFn`, which is to say they are callable.
-This is the one line of the whirlwind tour that the book leaves you to infer, and it explains a surprising amount of the code you are about to read.
+Clojure's collections implement `IFn` (Interface Functions), which is to say they are callable.
 
 Start with a map and a key, which can be written either way round:
 
@@ -39,7 +38,7 @@ Start with a map and a key, which can be written either way round:
 Neither is a shorthand for the other, and neither is special syntax.
 There are simply two callable things here, and you may call whichever you have to hand.
 
-A missing key gives `nil` rather than an error, and both forms take an optional third argument to use instead.
+A missing key gives `nil` rather than an error, and both forms take an optional third argument to use as a default.
 
 <div class="callout callout-gap">
 <p class="callout-title">The book doesn't say</p>

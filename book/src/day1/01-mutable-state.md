@@ -7,9 +7,6 @@ Day 1, *The Perils of Mutable State*, p50–53.
 
 </div>
 
-This is the chapter the rest of the book stands on, and it is over in three pages.
-It is worth slowing down, because the argument it makes is not really "mutable state causes bugs" — it is "shared mutable state is what stops you using your other nine cores", which is a claim about day 2.
-
 ## If you opened the book here
 
 The Clojure chapter follows Chapter 2, *Threads and Locks*, and assumes its conclusion.
@@ -20,11 +17,17 @@ Functional programming is offered as a way out: if nothing is shared *and* mutab
 ## What goes wrong, concretely
 
 Four threads, 100,000 increments each, all writing to one shared mutable slot.
-The arithmetic is not in doubt: the answer should be 400,000.
+The answer should be 400,000.
 
 ```clojure
 {{#include ../../../src/tenfold/mutable_state.clj:race}}
 ```
+
+Nothing there announces itself as dangerous, which is the point.
+`long-array` reads like ordinary Clojure, but it is interop wearing a disguise: it allocates a Java array — the `new long[1]` you would write in Java — and a Java array is plain mutable memory with no protection of any kind.
+`aset` then writes into it in place.
+That is destructive assignment, and it is the one thing ordinary Clojure code cannot do: `conj` and `assoc` return a new value and leave the original alone.
+The race needed both, and the syntax made neither obvious.
 
 Five consecutive runs gave:
 
@@ -105,45 +108,6 @@ Building a 100,000-element vector by `conj`-ing one at a time allocates a new ve
 This is not an obscure corner — it is how `into` is implemented in Clojure's own core (`(persistent! (reduce conj! (transient to) from))`), which is why `into` is so much faster than the `reduce conj` you would write by hand.
 
 The rule is that a transient is a *local* optimisation: confined to the function that created it, never shared between threads, never used after `persistent!`, and always used through its return value rather than for its effect.
-
-<div class="callout callout-exercise">
-<p class="callout-title">Exercise: the transient that lies</p>
-
-`conj!` and `assoc!` look like mutation, so it is tempting to call them for effect and ignore what they return.
-Try this in the REPL:
-
-```clojure
-(let [t (transient {})]
-  (dotimes [i 20] (assoc! t i i))
-  (count (persistent! t)))
-```
-
-Twenty entries went in.
-What comes out, and why?
-
-<details>
-<summary>Show answer</summary>
-
-`8`.
-
-A small Clojure map is an *array map*, a flat array of key-value pairs; past eight entries it switches representation to a hash map.
-When that switch happens, `assoc!` returns a **different object**, and the code above throws that return value away, so the first eight entries are all that survive.
-
-```clojure
-(count (persistent! (reduce (fn [t i] (assoc! t i i)) (transient {}) (range 20))))
-;=> 20
-```
-
-Clojure's own docstring for `transient` puts it plainly: transients "are not designed to be bashed in-place".
-Use the value each call returns, exactly as you would with the persistent versions.
-
-The trap is that it *nearly* works.
-With a transient vector, or with fewer than eight map entries, discarding the return value happens to give the right answer, so the habit forms on small test data and breaks on real data.
-This is hidden mutable state in miniature: correct-looking code whose failure depends on size, timing, or representation rather than on logic.
-
-</details>
-
-</div>
 
 ## The hard case is the state you did not know you had
 
