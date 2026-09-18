@@ -2,6 +2,28 @@
   "Day 1 — Programming Without Mutable State."
   (:require [clojure.core.reducers :as r]))
 
+
+;; maps are functions of keys, keys are functions of maps
+
+;; map definitions
+(def m1 {:a 7 :b 8 :c 9})
+
+;; lazy sequence
+(map m1 [:a :b])
+
+;; vector
+(mapv m1 [:a :b])
+
+;; mapping keywords
+(mapv :a [m1 m1 m1])
+
+;; filtering with a normal function
+(filterv (fn [x] (< x 7)) [2 3 4 5 6 7 8 9 10])
+
+;; filtering with a map as a filter func
+;; note that our map contains 2 as a key with 0 as the value
+(filterv {:a 0 "a" 0 2 0 3 1} [1 2 3 4 5])
+
 ;; ANCHOR: my-reduce
 (defn my-reduce
   "reduce, written out longhand. Blows the stack on long inputs:
