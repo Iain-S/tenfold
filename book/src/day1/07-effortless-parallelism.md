@@ -18,7 +18,8 @@ TODO — summarise, briefly, so the reader can orient.
 
 - How to measure honestly: JIT warm-up, `criterium` over `time`, median of several runs.
 - Why the speedup is not the core count — memory bandwidth, boxing, GC.
-- That `(r/fold + coll)` on a **list** is not parallel at all. The book's example uses a vector and never says why that matters.
+- That `(r/fold + coll)` on a **list** is not parallel at all.
+  The book's example uses a vector and never says why that matters.
 
 </div>
 

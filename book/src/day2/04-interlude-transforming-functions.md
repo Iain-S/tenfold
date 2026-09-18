@@ -11,9 +11,8 @@ Day 2, *Reducers' Internals*, p65 — the idea is used, never named.
 
 ## TODO
 
-The conceptual heart of the whole library: `transformf` takes a reducing
-function and returns a reducing function. Once you see that, `r/map` and
-`r/filter` stop being mysterious, and transducers become the obvious next step.
+The conceptual heart of the whole library: `transformf` takes a reducing function and returns a reducing function.
+Once you see that, `r/map` and `r/filter` stop being mysterious, and transducers become the obvious next step.
 
 - [ ] Build up from the reader's own `thingy` experiment in `calva_project`
 - [ ] Show why this composes without intermediate sequences

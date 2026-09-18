@@ -16,7 +16,8 @@ TODO — summarise, briefly, so the reader can orient.
 <div class="callout callout-gap">
 <p class="callout-title">The book doesn't say</p>
 
-- A reducible is **not** a collection. It has no elements; it cannot be counted, printed or seq'd.
+- A reducible is **not** a collection.
+  It has no elements; it cannot be counted, printed or seq'd.
 - "No intermediate sequences" is asserted — show it, by counting allocations.
 - Why `(into [] ...)` is the idiomatic way to force one.
 

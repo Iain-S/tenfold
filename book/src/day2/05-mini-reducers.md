@@ -18,7 +18,8 @@ TODO — summarise, briefly, so the reader can orient.
 
 - What `reify` does: an anonymous instance of a protocol, created in place.
 - Why a protocol rather than an interface, and what "polymorphic dispatch on the first argument" buys.
-- **`(f1)`** — the zero-arity call used as the seed, which the book prints without comment. See [CollFold and the two-arity combinef](07-collfold.md).
+- **`(f1)`** — the zero-arity call used as the seed, which the book prints without comment.
+  See [CollFold and the two-arity combinef](07-collfold.md).
 
 </div>
 

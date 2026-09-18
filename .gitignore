@@ -5,3 +5,4 @@ book/book/
 target/
 *.bz2
 book/src/quiz/
+.vscode/
