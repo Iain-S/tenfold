@@ -1,0 +1,70 @@
+[[questions]]
+id = "mutable-state-atomicity-vs-visibility"
+type = "MultipleChoice"
+prompt.prompt = """
+A worker thread loops until a plain (non-`volatile`, unsynchronised) boolean field is set to `true` by the main thread. The main thread sets it, but the worker never stops. Which problem is this?
+"""
+prompt.distractors = [
+  "An atomicity problem: setting a boolean is a read-modify-write and can be interleaved.",
+  "A deadlock: the two threads are each waiting on the other.",
+  "A scheduling problem: the worker thread is never given a time slice in which to observe the change.",
+]
+answer.answer = """
+A visibility problem: nothing forces the main thread's write to become visible to the worker, which may keep reading a cached copy indefinitely.
+"""
+context = """
+Atomicity is about *interleaving* — whether a read-modify-write can be split in half. Visibility is about whether another thread ever sees a write at all.
+
+Writing a boolean is already atomic, so atomicity is not the issue here. Without a happens-before relationship — `volatile`, `synchronized`, or a Clojure reference type — the JVM is free to keep the value in a register or core-local cache, and the worker can spin forever on a stale read.
+
+This is the failure mode to fear: it produces a hang rather than a wrong answer, and it often appears only on hardware you do not own.
+"""
+
+[[questions]]
+id = "mutable-state-transient-return"
+type = "MultipleChoice"
+prompt.prompt = """
+```clojure
+(let [t (transient {})]
+  (dotimes [i 20] (assoc! t i i))
+  (count (persistent! t)))
+```
+What does this return?
+"""
+prompt.distractors = [
+  "20 — `assoc!` mutates the transient in place, so all twenty entries are present.",
+  "0 — the return value of `assoc!` is discarded, so no entries are kept.",
+  "It throws, because a transient may not be modified inside `dotimes`.",
+]
+answer.answer = """
+8 — a small map is an array map, and when it grows past eight entries `assoc!` returns a new object that this code throws away.
+"""
+context = """
+Transients are mutable *drafts*, but they are not "bashed in place": each call returns the collection to use next, exactly as the persistent versions do. Most of the time the returned object is the same one, which is why discarding it appears to work.
+
+At eight entries the representation switches from an array map to a hash map, `assoc!` returns a different object, and everything after that is written to a value nobody kept.
+
+Written correctly — `(reduce (fn [t i] (assoc! t i i)) (transient {}) (range 20))` — the answer is 20. The bug's dependence on size, rather than on logic, is what makes it hard to catch in tests.
+"""
+
+[[questions]]
+id = "mutable-state-why-parallelism"
+type = "MultipleChoice"
+prompt.prompt = """
+Why does a book about *parallelism* open its functional-programming chapter with the perils of mutable state?
+"""
+prompt.distractors = [
+  "Because immutable data structures are faster to read, so parallel code spends less time waiting on memory.",
+  "Because mutable state makes programs harder to test, and parallel programs are hard enough to test already.",
+  "Because the JVM cannot distribute work across cores unless the data is immutable.",
+]
+answer.answer = """
+Because splitting a collection into independently processed chunks is only legal when no chunk can observe another's writes — immutability is the precondition for the whole fork/join structure.
+"""
+context = """
+Every technique in day 2 is one move: cut the collection up, process the pieces on separate cores, combine the results. That move requires the pieces to be independent.
+
+Introduce one shared mutable thing — a counter, a cache, a list being appended to — and the chunks must coordinate. Coordination means locks, and locks are what parallelising was meant to avoid.
+
+The JVM is perfectly capable of running threads over mutable data; the point is that *your* computation stops being decomposable, not that the platform refuses.
+"""
