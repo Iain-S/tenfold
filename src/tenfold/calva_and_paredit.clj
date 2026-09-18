@@ -1,4 +1,4 @@
-(ns tenfold.calva-and-paraedit
+(ns tenfold.calva-and-paredit
   "Day 1 — Setup Calva.")
 
 ;; Use ctrl+enter and alt+enter on different parts of this expression.
@@ -7,7 +7,7 @@
 ;; slurp forward
 (+ 1)5
 
-;; barf foreward
+;; barf forward
 (+ 1 2 3)
 
 ;; splice

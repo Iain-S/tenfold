@@ -3,26 +3,38 @@
   (:require [clojure.core.reducers :as r]))
 
 
-;; maps are functions of keys, keys are functions of maps
+;; Maps are functions of keys; keywords are functions of maps.
 
-;; map definitions
+;; ANCHOR: lookup-both-ways
 (def m1 {:a 7 :b 8 :c 9})
 
-;; lazy sequence
-(map m1 [:a :b])
+(m1 :a)             ;=> 7    the map is the function, the key is the argument
+(:a m1)             ;=> 7    the keyword is the function, the map is the argument
 
-;; vector
-(mapv m1 [:a :b])
+(m1 :zz)            ;=> nil  a missing key is not an error
+(m1 :zz :fallback)  ;=> :fallback
+(:zz m1 :fallback)  ;=> :fallback
+;; ANCHOR_END: lookup-both-ways
 
-;; mapping keywords
-(mapv :a [m1 m1 m1])
+;; ANCHOR: lookup-as-argument
+(map m1 [:a :b])       ;=> (7 8)    a lazy sequence
+(mapv m1 [:a :b])      ;=> [7 8]    a vector
 
-;; filtering with a normal function
-(filterv (fn [x] (< x 7)) [2 3 4 5 6 7 8 9 10])
+(mapv :a [m1 m1 m1])   ;=> [7 7 7]  the keyword does the looking up instead
+;; ANCHOR_END: lookup-as-argument
 
-;; filtering with a map as a filter func
-;; note that our map contains 2 as a key with 0 as the value
-(filterv {:a 0 "a" 0 2 0 3 1} [1 2 3 4 5])
+;; ANCHOR: lookup-as-predicate
+(filterv (fn [x] (< x 7)) [2 3 4 5 6 7 8 9 10])  ;=> [2 3 4 5 6]
+
+;; m1 has no integer keys, so every lookup is nil and everything is dropped
+(filterv m1 [1 2 3 4 5])                         ;=> []
+
+;; this map does have 2 as a key — and its value, 0, is truthy in Clojure
+(filterv {:a 0 "a" 0 2 0 3 1} [1 2 3 4 5])       ;=> [2 3]
+
+;; a set is the idiomatic membership predicate
+(filterv #{2 3} [1 2 3 4 5])                     ;=> [2 3]
+;; ANCHOR_END: lookup-as-predicate
 
 ;; ANCHOR: my-reduce
 (defn my-reduce

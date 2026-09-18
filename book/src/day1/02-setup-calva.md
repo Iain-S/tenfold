@@ -34,11 +34,11 @@ tenfold/
     tenfold/
       day1.clj                  # namespace tenfold.day1
       day2.clj                  # namespace tenfold.day2
-      calva_and_paraedit.clj    # the practice file for this chapter
+      calva_and_paredit.clj     # the practice file for this chapter
 ```
 
 The rule that catches everyone once: **the file path must match the namespace**, and underscores in filenames become hyphens in namespace names.
-A namespace `tenfold.mini-reducers` lives in `src/tenfold/mini_reducers.clj`, and the practice file above declares `tenfold.calva-and-paraedit`.
+A namespace `tenfold.mini-reducers` lives in `src/tenfold/mini_reducers.clj`, and the practice file above declares `tenfold.calva-and-paredit`.
 Get this wrong and you get a "namespace not found" that looks nothing like a filename problem.
 
 ## 3. Jack in
@@ -60,7 +60,7 @@ Jack-in starts the REPL *for* you with the nREPL dependencies Calva needs alread
 The alternative — "Connect to a running REPL" — attaches to a REPL you started yourself, which means getting that middleware right by hand.
 Use jack-in unless you have a specific reason not to.
 
-With the REPL connected, open `src/tenfold/calva_and_paraedit.clj`.
+With the REPL connected, open `src/tenfold/calva_and_paredit.clj`.
 The rest of this chapter is practised in that file: every command below has a form there waiting for it, in the order they are introduced.
 
 Do not load the file as a whole — evaluate the forms one at a time, as instructed.
@@ -102,7 +102,7 @@ Learn these four and the rest can wait.
 
 On Windows and Linux, slurp and barf are <kbd>ctrl+alt+right</kbd> and <kbd>ctrl+alt+left</kbd>.
 
-The practice file has a labelled form for each of the four — `;; slurp forward`, `;; barf foreward`, `;; splice`, `;; raise` — so you can try each command on a form that is already in the wrong shape.
+The practice file has a labelled form for each of the four — `;; slurp forward`, `;; barf forward`, `;; splice`, `;; raise` — so you can try each command on a form that is already in the wrong shape.
 
 Slurp and barf are the two that change how you write code.
 Say you have:
