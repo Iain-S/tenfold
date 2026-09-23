@@ -9,7 +9,6 @@ target/
 .calva/
 .vscode/
 .clj-kondo/
-.githooks/
 .lsp/
 
 # Data

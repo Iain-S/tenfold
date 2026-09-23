@@ -306,6 +306,7 @@ Two transform calls in total — not two per element.
 **The steps then run inside-out, once per element, in one pass.** `inner step sees 1` comes before `outer step sees 2`, because inner's transformation was applied last and therefore wraps outermost at call time.
 Note also that the outer step sees `2`: the value has already been incremented by the inner layer on its way through.
 There is no intermediate collection between them — the composition happened to the *function*, once, before the walk began.
+That collapsing of several per-element functions into one is what [the interlude](04-interlude-transforming-functions.md) calls fusion, and it is what you are watching happen in those first two lines of output.
 
 <div class="callout callout-repl">
 <p class="callout-title">Try it in the REPL</p>

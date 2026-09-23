@@ -9,7 +9,7 @@ The design doc is [`docs/superpowers/specs/2026-09-15-tenfold-design.md`](docs/s
 ```text
 Makefile              serve / build / clean / repl / fmt / hooks / tools
 scripts/mdfmt.py      the Markdown one-sentence-per-line formatter
-.githooks/pre-commit  runs the format check on staged Markdown
+.pre-commit-config.yaml  the hooks git runs before each commit
 book/book.toml        mdBook config (quiz preprocessor, callout CSS, Pages URLs)
 book/src/             chapters; SUMMARY.md is the table of contents
 book/src/quizzes/     mdbook-quiz TOML, one per chapter
@@ -30,7 +30,7 @@ $ make clean                    # drop book/book and generated quiz assets
 $ make repl                     # Clojure REPL with src/ on the classpath
 $ make fmt                      # reflow Markdown to one sentence per line
 $ make fmt-check                # fail if any Markdown is unformatted
-$ make hooks                    # enable the pre-commit format check (once per clone)
+$ make hooks                    # install the pre-commit hooks (once per clone)
 $ make tools                    # install mdBook + mdbook-quiz at CI's versions
 $ make highlight-js             # regenerate book/theme/highlight.js
 $ make corpus                   # fetch a dump shard, extract 5000 pages to wiki5000/
@@ -96,7 +96,9 @@ Sentences are the unit of the line, so a diff shows the sentence that changed ra
 The same rule applies inside list items: the first sentence follows the marker, and each later sentence goes on its own line, indented to line up with the text above it.
 
 Run `make fmt` after writing prose; `scripts/mdfmt.py` does the reflow, and leaves code fences, tables, raw HTML, headings and `{{#include}}` directives untouched.
-`make hooks` points git at `.githooks/`, whose `pre-commit` runs `make fmt-check` over staged Markdown and refuses the commit if anything is unformatted — worth running once per clone.
+`make hooks` installs the [pre-commit](https://pre-commit.com/) hooks, which run the same check over staged Markdown and refuse the commit if anything is unformatted — worth running once per clone.
+`.pre-commit-config.yaml` is the only hook mechanism here; it also covers whitespace, YAML and TOML syntax, spelling, markdownlint, and a guard against committing the book PDF.
+Install the runner first, with `brew install pre-commit` or `pipx install pre-commit`.
 The transformation only changes where lines break, so the rendered HTML is identical either way.
 
 ### Callouts

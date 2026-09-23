@@ -40,8 +40,9 @@ fmt:  ## Reflow Markdown to one sentence per line
 fmt-check:  ## Fail if any Markdown is not one sentence per line
 	python3 scripts/mdfmt.py --check $(MARKDOWN)
 
-hooks:  ## Point git at .githooks (enables the pre-commit format check)
-	git config core.hooksPath .githooks
+hooks:  ## Install the pre-commit hooks (once per clone)
+	@git config --unset-all core.hooksPath 2>/dev/null || true
+	pre-commit install
 
 corpus:  ## Download a Wikipedia dump shard and extract pages into wiki5000/
 	@test -s $(DUMP) || { echo "Downloading $(DUMP) (~285MB, resumable)..."; \

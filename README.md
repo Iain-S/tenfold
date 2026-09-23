@@ -17,7 +17,7 @@ $ make serve     # live preview at http://localhost:3000
 `make` with no target lists the rest (`build`, `clean`, `repl`, `fmt`).
 
 Prose is written one sentence per line, with no hard wrap.
-`make fmt` enforces that, and `make hooks` installs a pre-commit check — see [AGENTS.md](AGENTS.md).
+`make fmt` enforces that, and `make hooks` installs the pre-commit hooks that check it — see [AGENTS.md](AGENTS.md).
 
 ## Running the Clojure
 

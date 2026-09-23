@@ -1,7 +1,8 @@
 (ns tenfold.mini-reducers
   "A miniature reducers library, built from scratch — and, first, the
   protocol machinery the book uses a page before explaining it."
-  (:require [clojure.core.protocols :as p]))
+  (:require [clojure.core.protocols :as p]
+            [clojure.core.reducers :as r]))
 
 ;; ANCHOR: own-protocol
 ;; A protocol is a named set of functions, with no implementation.
@@ -157,3 +158,33 @@
   ;; Reducing is what triggers everything.
   (my-reduce + 0 r))
 ;; ANCHOR_END: traced-map
+
+;; ANCHOR: make-folder
+(defn make-folder
+  "make-reducer's bigger sibling: the same transformation, on an object that
+  can also be *split*.
+
+  Identical to make-reducer except for the last three lines, which pass the
+  transformed reducing function down to the wrapped collection's own
+  coll-fold — so the chunking, forking and combining are done by whatever we
+  wrapped, and our transformation rides along into every chunk."
+  [foldable transformf]
+  (reify
+    p/CollReduce
+    (coll-reduce [_ f] (p/coll-reduce foldable (transformf f) (f)))
+    (coll-reduce [_ f init] (p/coll-reduce foldable (transformf f) init))
+
+    r/CollFold
+    (coll-fold [_ n combinef reducef]
+      (r/coll-fold foldable n combinef (transformf reducef)))))
+
+(defn folding-map [mapf foldable]
+  (make-folder foldable
+               (fn [reducef]
+                 (fn [acc v] (reducef acc (mapf v))))))
+
+(defn folding-filter [predf foldable]
+  (make-folder foldable
+               (fn [reducef]
+                 (fn [acc v] (if (predf v) (reducef acc v) acc)))))
+;; ANCHOR_END: make-folder

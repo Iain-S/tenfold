@@ -1,0 +1,26 @@
+# markdownlint rules for tenfold — see AGENTS.md for the writing conventions
+# these are tuned to. https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+default: true
+
+# Prose is one sentence per line with no hard wrap, so lines run long by design.
+MD013: false
+
+# Callouts are raw HTML blocks (<div class="callout …">, <details>).
+MD033: false
+
+# Chapters are fragments of a book; mdBook supplies the page title.
+MD041: false
+
+# Repeated headings are fine across the different sections of a chapter.
+MD024:
+  siblings_only: true
+
+# Shell blocks are written with a `$` prompt, as in AGENTS.md and the READMEs.
+MD014: false
+
+# SUMMARY.md uses top-level headings to divide the table of contents into parts.
+MD025: false
+
+# `make fmt` indents continuation sentences to line up with the list text.
+MD007:
+  indent: 2

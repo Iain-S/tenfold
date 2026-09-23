@@ -75,6 +75,22 @@ The traced example in [Building a mini reducers library](05-mini-reducers.md) pr
 
 </div>
 
+## A name for it: fusion
+
+*Clojure for the Brave and True* has a good name for what the diagram above shows.
+It calls the function applied to each element an **elemental function**, and calls collapsing several of them into one **fusion** — see [Know Your Reducers](https://www.braveclojure.com/quests/reducers/know-your-reducers/).
+
+The distinction it draws is the useful part.
+You can always fuse by hand: write `(map (comp sq dbl inc) coll)` rather than three nested `map`s, and you have one elemental function and no intermediate sequences.
+That works, and it is a refactoring you have to remember to do — rewriting a pipeline that was perfectly clear as three steps.
+
+Reducers fuse **automatically**.
+Chain three `r/map`s and the transformations compose into a single reducing function before the walk begins, exactly as the diagram shows, with no rewriting on your part.
+Written as three steps, executed as one.
+
+That also sharpens the claim about intermediate collections.
+It is not that reducers build them more cleverly; it is that fusing the elemental functions leaves nothing to build.
+
 ## Does it actually pay?
 
 It is tempting to assume the intermediate-collection argument makes reducers dramatically faster.
@@ -95,10 +111,13 @@ The ranges are the spread across those sessions, and they are wide: run-to-run v
 
 Three things survive that caveat.
 
-**Stacking reducers costs little.** Nesting three `my-map`s came out 0–15% slower than composing the three functions and using one `my-map` — one extra closure call per element per layer, and no allocation.
+**Stacking reducers costs little** — which is the fusion, visible in the numbers.
+Nesting three `my-map`s came out 0–15% slower than hand-fusing the three functions with `comp` and using one `my-map`: one extra closure call per element per layer, and no allocation.
+Chaining costs about what hand-fusing costs, which is what "fuses automatically" amounts to when measured rather than asserted.
 
 **Stacking lazy sequences costs a lot.** The same choice is worth 35–50% there, consistently.
 That gap is the intermediate sequences: two of them, built and discarded.
+Lazy sequences do not fuse, so there the hand-fusing is not optional if you care about it.
 
 **The serial win is modest.** Reducers are not dramatically faster than a lazy pipeline that composes its functions; on a vector, chunked sequences are already efficient.
 Anyone selling reducers on serial speed alone is overselling.
