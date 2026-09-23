@@ -27,7 +27,7 @@
 ;; ANCHOR_END: dump-reader
 
 ;; ANCHOR: page-texts
-(defn- tag=
+(defn tag=
   "Does this node have the given tag?
 
   Compared by *name*, not by keyword identity. A real dump declares a default
@@ -39,12 +39,12 @@
        (some? (:tag node))
        (= (name tag) (name (:tag node)))))
 
-(defn- child
+(defn child
   "The first child element of `element` with the given tag."
   [element tag]
   (first (filter #(tag= tag %) (:content element))))
 
-(defn- page-text
+(defn page-text
   "The article text buried at <page><revision><text>...</text></revision></page>."
   [page]
   (first (:content (child (child page :revision) :text))))

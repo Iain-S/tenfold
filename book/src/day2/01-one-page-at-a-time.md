@@ -106,15 +106,15 @@ Develop against the first; save the second for the timing chapter.
 
 ## Laziness is not a style preference here
 
-With 5,000 real articles — 195MB of text, median article 20KB — the difference between consuming the sequence and keeping it is the difference between working and not:
+With the 5,000 articles `make corpus` produces — 257MB of text, median article 35KB — the difference between consuming the sequence and keeping it is the difference between working and not:
 
 | | 256MB heap |
 |---|---|
-| `(count-words-sequential (dir-page-texts "wiki5000"))` | 27.6s, **completes** |
+| `(count-words-sequential (dir-page-texts "wiki5000"))` | 25–26s, **completes** |
 | `(vec (dir-page-texts "wiki5000"))` | **OutOfMemoryError** |
 
-Same data, same heap, same JVM: 31,157,950 words and 804,126 distinct ones out of the first, and a heap dump out of the second.
-Measured on an Apple M1 Pro, Temurin JDK 17, Clojure 1.12.1, `-Xmx256m`.
+Same data, same heap, same JVM: 41,046,437 words and 984,873 distinct ones out of the first, and a heap dump out of the second.
+Measured on an Apple M1 Pro, Temurin JDK 17, Clojure 1.12.1, `-Xmx256m`, on a corpus built by `make corpus`; the time is the median of three runs after the first, which pays 45 seconds for a cold page cache.
 
 The lesson generalises past this example.
 A lazy sequence is only as lazy as its least patient consumer, and holding a reference to the head of one is how you turn a streaming program into a loading program without changing a line of the pipeline.
@@ -156,7 +156,7 @@ The first streams: each page is read, counted and discarded.
 The second holds all 1,000 pages at once — `vec` forces the sequence inside `with-open`, so it does not throw, it simply loads the lot into memory and then does the same work.
 
 The subtler point is that *neither* is constant memory overall.
-`frequencies` builds a map of every distinct word, and that map grows with the vocabulary, not with the number of pages: 804,126 entries for 5,000 articles.
+`frequencies` builds a map of every distinct word, and that map grows with the vocabulary, not with the number of pages: 123,626 entries for the first 200 articles, and 984,873 for all 5,000.
 Streaming the input does not make the output small.
 
 This is the distinction to hold on to when day 2 starts folding: the input can be streamed, the accumulator cannot.

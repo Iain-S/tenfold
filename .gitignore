@@ -1,16 +1,29 @@
+# Build artifacts
 book/book/
+book/src/quiz/
+target/
+
+# Hidden directories
 .cpcache/
 .nrepl-port
 .calva/
-target/
-*.bz2
-book/src/quiz/
 .vscode/
-todo.md
 .clj-kondo/
 .githooks/
 .lsp/
+
+# Data
+*.bz2
+wiki5000
+
+# Papers and docs
 seven-concurrency-models-in-seven-weeks*
 *.pdf
 pdf_*.txt
-wiki5000
+
+# Local files
+todo.md
+local_*.clj
+
+
+

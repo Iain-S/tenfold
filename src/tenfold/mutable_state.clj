@@ -79,7 +79,7 @@ v2                        ;=> [1 2 3 4]
 ;; ANCHOR_END: transient
 
 ;; ANCHOR: swap-vs-reset
-(defn- on-four-threads
+(defn on-four-threads
   "Run `work` 100,000 times on each of four threads, then wait for them all."
   [work]
   (run! deref (doall (for [_ (range 4)]

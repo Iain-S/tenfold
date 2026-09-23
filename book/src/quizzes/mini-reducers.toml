@@ -1,0 +1,63 @@
+[[questions]]
+id = "mini-reducers-where-from"
+type = "MultipleChoice"
+prompt.prompt = """
+You type the book's `my-reduce` into a fresh namespace and get `Unable to resolve symbol: coll-reduce`. Why?
+"""
+prompt.distractors = [
+  "`coll-reduce` is private to `clojure.core.reducers` and cannot be called from your own code.",
+  "`coll-reduce` only exists once a collection has extended `CollReduce`, so it must be defined first.",
+  "`coll-reduce` is a special form recognised only inside `defprotocol` bodies.",
+]
+answer.answer = """
+It lives in `clojure.core.protocols`, which `clojure.core` does not refer for you — your namespace needs `(:require [clojure.core.protocols :as p])`.
+"""
+context = """
+`coll-reduce` is an ordinary public function: `(fn? p/coll-reduce)` is `true`, and its var's metadata names the protocol it belongs to.
+
+The book's listing shows it being called with no `ns` form in view, which is the single most likely reason its code does not run when typed in.
+"""
+
+[[questions]]
+id = "mini-reducers-object-fallback"
+type = "MultipleChoice"
+prompt.prompt = """
+```clojure
+(satisfies? clojure.core.protocols/CollReduce 5)
+(clojure.core.protocols/coll-reduce 5 + 0)
+```
+What do these two give?
+"""
+prompt.distractors = [
+  "`false`, then `IllegalArgumentException: No implementation of method: :coll-reduce ... for class: java.lang.Long`.",
+  "`false`, then `0` — with no implementation, `coll-reduce` returns the init value unchanged.",
+  "`true`, then `5` — a non-collection reduces to itself.",
+]
+answer.answer = """
+`true`, then `IllegalArgumentException: Don't know how to create ISeq from: java.lang.Long`.
+"""
+context = """
+`CollReduce` is extended to `Object`, so *every* value satisfies it — `satisfies?` tells you nothing useful here. The `Object` implementation accepts the call and then fails inside `seq`, which is why the error never mentions protocols.
+
+Compare a protocol with no `Object` fallback, where the message names the method, the protocol and the class. The same design decision is what makes `r/fold` degrade silently to a serial `reduce` instead of refusing: an `Object` implementation exists, so nothing can fail.
+"""
+
+[[questions]]
+id = "mini-reducers-not-a-collection"
+type = "MultipleChoice"
+prompt.prompt = """
+`(my-map inc [1 2 3 4])` returns a `reify` of `CollReduce`. Which of these works on it?
+"""
+prompt.distractors = [
+  "`count` — it holds the underlying vector, so it knows there are four elements.",
+  "`first` — it can compute the first element without running the whole reduction.",
+  "None of them: a reified protocol instance can only be used through the protocol's own function.",
+]
+answer.answer = """
+`reduce` and `into` work; `count`, `first` and `seq` all throw.
+"""
+context = """
+Clojure's `reduce` falls back to the `CollReduce` protocol for types that do not implement `IReduceInit`, and `into` is implemented with `reduce` — so the standard library handles our object with no registration of any kind.
+
+Everything else fails because a reducer is not a collection. It is a recipe: a reducible plus a transformation, which has computed nothing yet. `count` would require running it, and `first` would require an intermediate result that deliberately never exists.
+"""
