@@ -188,6 +188,15 @@ It takes an existing `Greet` and a function, and returns a new `Greet` that dele
 The new object holds two things it was given, implements one method, and does its real work by calling the object it wraps.
 That is `make-reducer`, entire — bar one twist.
 
+Look closely at where `transformf` sits in `decorate`, because this is the thing that changes:
+
+```clojure
+(transformf (greeting greeter))     ; delegate first, transform the answer
+```
+
+The call to `greeting` happens, an answer comes back, and *then* it is transformed.
+`make-reducer` puts `transformf` on the other side of the delegation — and with it, all of the work.
+
 ## Now the book's version
 
 The twist is *what* gets transformed.
@@ -232,7 +241,7 @@ What we actually want is `reducible`, the object being wrapped, and that arrives
 So the parameter naming the object is the one we throw away.
 
 `this` earns its name when a method needs the object it is a method of.
-The `PageCorpus` type later in this chapter has exactly one such line, where the two-argument arity supplies a seed and hands the work to its own three-argument arity:
+The `PageCorpus` type in [Folding a collection of your own](08-foldable-collection.md) has exactly one such line, where the two-argument arity supplies a seed and hands the work to its own three-argument arity:
 
 ```clojure
 (coll-reduce [this f] (p/coll-reduce this f (f)))
@@ -245,6 +254,58 @@ Clojure's own reducers library does the same thing in the same place, so it is i
 The object it returns is not a collection.
 It holds a reducible and a transformation, and the only thing it knows how to do is be reduced — applying the transformation to whatever reducing function it is handed.
 `(my-map inc [1 2 3 4])` has not mapped anything; it is the *recipe*, and nothing runs until `my-reduce` supplies a reducing function.
+
+### What actually triggers the work
+
+Put the two side by side:
+
+```clojure
+(transformf (greeting greeter))                      ; decorate:     work, then transform
+(p/coll-reduce reducible (transformf f) init)        ; make-reducer: transform, then work
+```
+
+In `decorate` the delegated call is *inside* `transformf`'s argument, so it has already run.
+In `make-reducer` `transformf` is applied to `f` first, and the transformed function is handed *down* to the reducible — which has not been asked to do anything yet.
+
+So when does anything happen?
+Here is `my-map` again with print statements in both layers:
+
+```clojure
+{{#include ../../../src/tenfold/mini_reducers.clj:traced-map}}
+```
+
+Building the thing prints **nothing**:
+
+```clojure
+(def r (traced-map "outer" inc (traced-map "inner" inc [1 2])))
+;; (silence)
+```
+
+Two reducers now exist, each holding a reducible and a transform function, and not one element has been touched.
+Reducing is what sets it going:
+
+```text
+(my-reduce + 0 r)
+
+  outer transformf runs — building a reducing function
+  inner transformf runs — building a reducing function
+    inner step sees 1
+    outer step sees 2
+    inner step sees 2
+    outer step sees 3
+;=> 7
+```
+
+Three things to read off that trace.
+
+**The trigger is the outermost `coll-reduce` call, and nothing else.** `my-reduce` asks the outer reducer to reduce itself; that is the first moment any of this machinery runs.
+
+**The transform functions run once each, outside-in, before any element is seen.** Outer transforms `+` and passes the result down; inner transforms *that* and passes it down again; the vector finally receives a single reducing function that carries both transformations.
+Two transform calls in total — not two per element.
+
+**The steps then run inside-out, once per element, in one pass.** `inner step sees 1` comes before `outer step sees 2`, because inner's transformation was applied last and therefore wraps outermost at call time.
+Note also that the outer step sees `2`: the value has already been incremented by the inner layer on its way through.
+There is no intermediate collection between them — the composition happened to the *function*, once, before the walk began.
 
 <div class="callout callout-repl">
 <p class="callout-title">Try it in the REPL</p>
@@ -288,128 +349,6 @@ Clojure's own `reduce` falls back to the `CollReduce` protocol for types that do
 Everything else fails, and should: we implemented one protocol with one function.
 A reducer is not a collection.
 It cannot tell you its length, or give you its first element, because it has not computed anything — it is a recipe waiting for a reducing function, and `count` would mean running it.
-
-</details>
-
-</div>
-
-## Making a collection of your own foldable
-
-The book builds a reducers library to show how reducers work.
-The other way to understand the same machinery is to sit on the other side of it: write a collection that `r/fold` can parallelise, and see what it demands of you.
-
-Two protocols do all the work, and each has exactly one function:
-
-```clojure
-(defprotocol CollReduce                         ; clojure.core.protocols
-  (coll-reduce [coll f] [coll f val]))
-
-(defprotocol CollFold                           ; clojure.core.reducers
-  (coll-fold [coll n combinef reducef]))
-```
-
-`reduce` goes through the first, `r/fold` through the second.
-
-<div class="callout callout-gap">
-<p class="callout-title">The book doesn't say</p>
-
-Neither protocol has to be implemented for `reduce` or `fold` to *work* on your type.
-Both have a baseline extended to `Object`: `CollReduce`'s walks the sequence, and `CollFold`'s is three lines whose own comment in Clojure's source reads `;;can't fold, single reduce`.
-
-So the question is never "does my collection support folding" — everything does.
-The question is whether it supports folding *in parallel*, and the answer arrives as a running time rather than as an error.
-
-</div>
-
-### A foldable corpus
-
-Our word count reads 5,000 Wikipedia articles from a directory.
-That is a collection: 5,000 elements, each a file to be read.
-Here it is as a type:
-
-```clojure
-{{#include ../../../src/tenfold/corpus.clj:corpus-type}}
-```
-
-`coll-reduce` is the easy half — delegate to `reduce` over a lazy `map slurp`.
-
-`coll-fold` is the interesting half, and it is the binary chop from the previous chapter written out by hand: below the chunk size, read this chunk's files and reduce them on this thread; above it, split the file vector in two, fork one half, recurse into the other, and combine the two results.
-It is the same shape as `foldvec` in Clojure's own source, over files instead of tree nodes.
-
-Writing it settles the `combinef` question from the other direction.
-You seed each chunk yourself, with `(combinef)` and no arguments — so the zero-arity is not a quirk of the API, it is the only way a chunk that has not started yet can have a value.
-
-<div class="callout callout-gap">
-<p class="callout-title">The book doesn't say</p>
-
-The extension point is public; the plumbing to implement it is not.
-`clojure.core.reducers` marks `fjinvoke`, `fjfork` and `fjjoin` private — only `fjtask` is public — so a type that wants to fork its own tasks re-implements those three lines over `ForkJoinPool` and `ForkJoinTask`:
-
-```clojure
-{{#include ../../../src/tenfold/corpus.clj:fj}}
-```
-
-Not difficult, but a strange omission in a library whose whole purpose is extensibility.
-
-</div>
-
-### You may not need the type at all
-
-There is a cheaper trick, and it is worth reaching for first.
-A **vector of filenames** is already foldable, because it is a vector.
-Fold that, and do the reading inside `reducef`:
-
-```clojure
-{{#include ../../../src/tenfold/corpus.clj:vector-of-files}}
-```
-
-No protocols, no fork/join, no `deftype` — twelve lines, and the pages are still read one at a time rather than all held in memory.
-The collection being folded is a vector of `File` objects, a few hundred kilobytes; the 250MB of text never exists all at once.
-
-### Four ways to count the same words
-
-Same 5,000 articles, same answer every time — 41,046,437 words, 984,873 distinct:
-
-| Approach | Time | Parallel? |
-|---|---|---|
-| sequential `reduce` over a lazy sequence | 22.8s | no |
-| `r/fold` over the same lazy sequence | 22.6s | **no**, silently |
-| `r/fold` over a vector of filenames | **5.0s** | yes |
-| `r/fold` over our `PageCorpus` type | **5.0s** | yes |
-
-Medians of three runs on an Apple M1 Pro (10 cores), Temurin JDK 17, Clojure 1.12.1, over a corpus built by `make corpus`.
-A 4.5× speedup on ten cores, which is the honest shape of these things — [Effortless parallelism?](../day1/07-effortless-parallelism.md) is about why it is not ten.
-
-Three things fall out of that table.
-
-**Row two is the whole problem.** Identical code to row three, identical result, and no parallelism whatsoever — the `Object` fallback ran a plain `reduce` and said nothing.
-
-**Rows three and four are the same speed.** The difference between them is within run-to-run noise, and the plain vector of filenames is a tenth of the code.
-That is not a disappointment — it is the useful result.
-`PersistentVector`'s own `coll-fold` does the same binary chop ours does, so there is nothing to win by writing it again.
-
-**So when is the type worth writing?** When you cannot produce the vector.
-Files in a directory enumerate cheaply, so row three works.
-Pages inside a 24GB XML dump do not: you do not know where page 3,000,000 starts until you have parsed everything before it, so there is no vector to hand `r/fold` — and that is precisely the case day 2 leaves the reader stuck with.
-
-<div class="callout callout-exercise">
-<p class="callout-title">Exercise</p>
-
-Our `coll-fold` ignores `n` when deciding *how* to split — it always halves.
-Clojure's `foldvec` does the same.
-Why is halving the right answer, rather than cutting the collection into exactly `(/ count n)` equal chunks up front?
-
-<details>
-<summary>Show answer</summary>
-
-Because halving builds a *tree* of tasks, and the tree is what fork/join needs.
-
-Cutting into N chunks up front gives one flat layer of tasks and one thread to combine all N results.
-Halving recursively means each combine happens on the thread that forked the two halves, so the combining is parallel too — it mirrors the shape of the split.
-
-It also means work-stealing has something to steal.
-A forked half is a task any idle worker can pick up; a flat partition assigns everything before any timing information exists.
-If one chunk turns out to be slow — one enormous article — the tree can still rebalance around it.
 
 </details>
 

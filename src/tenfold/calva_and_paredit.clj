@@ -19,7 +19,7 @@
 ;; raise again
 (+ (+ 1 1) 0)
 
-;; change to 
+;; change to
 ;; (println (map inc [1 2 3]))
 ;; using slurp, barf, splice and/or raise
 (map inc [1 2 3]) (println "done")
@@ -42,4 +42,3 @@
      (/ 7 1)))
 
 (goodfunc)
-

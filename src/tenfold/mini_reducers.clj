@@ -138,3 +138,22 @@
   (my-reduce + 0 (my-map inc [1 2 3 4]))                   ;=> 14
   (my-reduce + 0 (my-filter even? (my-map inc [1 2 3 4]))) ;=> 6
   )
+
+;; ANCHOR: traced-map
+(defn traced-map
+  "my-map, with print statements, to show when each part actually runs."
+  [label f reducible]
+  (make-reducer reducible
+                (fn [rf]
+                  (println " " label "transformf runs — building a reducing function")
+                  (fn [acc v]
+                    (println "   " label "step sees" v)
+                    (rf acc (f v))))))
+
+(comment
+  ;; Building prints nothing at all: no work has happened.
+  (def r (traced-map "outer" inc (traced-map "inner" inc [1 2])))
+
+  ;; Reducing is what triggers everything.
+  (my-reduce + 0 r))
+;; ANCHOR_END: traced-map

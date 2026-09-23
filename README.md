@@ -5,7 +5,7 @@ A companion to **days 1 and 2 of the Clojure chapter** of *Seven Concurrency Mod
 I found the book moved a bit too quickly and used functions without thoroughly introducing them first.
 This companion book tries to rectify that.
 
-Read it at **https://iain-s.github.io/tenfold** (with the book open beside you).
+Read it at **<https://iain-s.github.io/tenfold>** (with the book open beside you).
 
 ## Building
 

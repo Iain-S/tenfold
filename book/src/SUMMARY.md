@@ -26,7 +26,8 @@
 - [Building a mini reducers library](day2/05-mini-reducers.md)
 - [The binary chop](day2/06-binary-chop.md)
 - [CollFold and the two-arity combinef](day2/07-collfold.md)
-- [When fold doesn't help](day2/08-when-fold-doesnt-help.md)
+- [Folding a collection of your own](day2/08-foldable-collection.md)
+- [When fold doesn't help](day2/09-when-fold-doesnt-help.md)
 
 ---
 
