@@ -355,4 +355,63 @@ It cannot tell you its length, or give you its first element, because it has not
 
 </div>
 
+## One more object: `make-folder`
+
+There is a gap between what we have built and what `clojure.core.reducers` ships, and it is worth closing before leaving the chapter, because the gap is day 2's whole subject.
+
+Chain our reducers and fold the result:
+
+```clojure
+(r/fold + (->> (vec (range 10)) (my-filter even?) (my-map inc)))   ;=> 25
+```
+
+The answer is right.
+No parallelism happened.
+Our object implements `CollReduce` and nothing else, so `r/fold` found the `Object` fallback and ran a serial `reduce` — the library's silent degradation, faithfully reproduced in our own miniature version of it.
+
+Clojure's library has two builders for exactly this reason, and their docstrings differ by one word:
+
+- `reducer` — "Given a **reducible** collection … returns a **reducible** collection".
+  Implements `CollReduce`.
+- `folder` — "Given a **foldable** collection … returns a **foldable** collection".
+  Implements `CollReduce` *and* `CollFold`.
+
+`r/map` and `r/filter` are built on `folder`, which is why their docstrings end with the single word "Foldable."
+`make-reducer`, which is what the book builds, is the other one.
+
+Ours is five lines longer:
+
+```clojure
+{{#include ../../../src/tenfold/mini_reducers.clj:make-folder}}
+```
+
+The `coll-reduce` arities are unchanged.
+The new part passes the transformed reducing function to the wrapped collection's *own* `coll-fold`, so the splitting, forking and combining are done by whatever we wrapped — a vector knows how to chop itself up — and our transformation rides along into every chunk.
+
+Measured on a vector of 1,000,000 elements, with a filter and a square-root map:
+
+| | ms |
+|---|---|
+| `reduce` over a `make-reducer` chain | 9.0 |
+| `r/fold` over a `make-reducer` chain | 8.3 |
+| `r/fold` over a `make-folder` chain | **2.1** |
+| `r/fold` over Clojure's own `r/filter` + `r/map` | 2.9 |
+
+Apple M1 Pro (10 cores), Temurin JDK 17, Clojure 1.12.1, criterium `quick-benchmark`.
+
+Row two is the one to remember: **folding a reducer is not an error and not a warning — it is just the serial answer**, within noise of the `reduce` above it.
+Row three is the same pipeline, five lines later, four times faster.
+
+<div class="callout callout-gap">
+<p class="callout-title">The book doesn't say</p>
+
+That there are two kinds of thing here at all.
+
+Day 2 builds `make-reducer`, then moves on to folding, and never mentions that the objects it just taught you to build cannot be folded in parallel.
+The vocabulary hides it too: "reducer" and "reducible" and "foldable" are used interchangeably in ordinary conversation, and in this library they are three different contracts.
+
+The rule is short enough to remember: **`CollReduce` gets you `reduce`; `CollFold` gets you cores.**
+
+</div>
+
 {{#quiz ../quizzes/mini-reducers.toml}}
